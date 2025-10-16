@@ -1,0 +1,58 @@
+# PyPortFinder - Simple Python Port Scanner (Pentest Tool)
+# Bro, this tool is for network reconnaissance. Use it for good (pentesting)!
+
+import socket
+import sys
+
+def scan_port(ip, port):
+    """Belirtilen IP ve portu tarar."""
+    try:
+        # TCP bağlantısı için socket oluştur
+        sock = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
+        # Hızlı sonuç almak için timeout ayarı (0.5 saniye)
+        sock.settimeout(0.5) 
+        
+        # Bağlanmaya çalış
+        result = sock.connect_ex((ip, port))
+        sock.close()
+        
+        if result == 0:
+            return True # Port açık
+        else:
+            return False # Port kapalı
+            
+    except socket.gaierror:
+        print("\n[-] Error: Hostname could not be resolved.")
+        sys.exit()
+    except socket.error:
+        print("\n[-] Error: Could not connect to server.")
+        return False
+
+# --- Ana Fonksiyon ---
+if __name__ == "__main__":
+    # Tarayacağımız hedef IP'yi buraya yaz
+    target_ip = "127.0.0.1"  # Şu an kendi bilgisayarını test ediyor (localhost)
+    
+    # Sık kullanılan ve tarayacağımız portlar
+    common_ports = [21, 22, 23, 80, 443, 3389, 8080] 
+
+    print(f"\n[!] Starting Scan for Target: {target_ip}")
+    print("-" * 30)
+    
+    open_ports = []
+    
+    for port in common_ports:
+        if scan_port(target_ip, port):
+            print(f"[+] Port {port}: OPEN")
+            open_ports.append(port)
+        else:
+            # Sadece açık portları göstermek için bu satırı silebilirsin
+            # print(f"[-] Port {port}: Closed")
+            pass # Şimdilik kapalı portları gösterme
+            
+    print("-" * 30)
+    if open_ports:
+        print(f"[+] Scan Complete. Found {len(open_ports)} open port(s): {open_ports}")
+    else:
+        print("[+] Scan Complete. No common ports found open.")
+    print("-" * 30)
